@@ -56,8 +56,8 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={form.password} onChange={handleChange} required
               />
-              <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
-                <Link to="/forgot-password" style={{ color: '#c9956a', fontSize: '0.85rem', fontWeight: '600' }}>
+              <div style={{ textAlign: 'right', marginTop: '0.4rem' }}>
+                <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: '#c9956a' }}>
                   Forgot password?
                 </Link>
               </div>

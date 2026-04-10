@@ -1,13 +1,17 @@
 // =============================================
 // routes/auth.js - Authentication Routes
+// Includes: Register, Login, Forgot Password
 // =============================================
 
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
+
+// In-memory OTP store: { email: { otp, expiresAt } }
+const otpStore = {};
 
 // Helper: Generate JWT token
 const generateToken = (id) => {
@@ -16,16 +20,30 @@ const generateToken = (id) => {
   });
 };
 
+// Helper: Send email via Gmail
+const sendEmail = async (to, subject, html) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+  await transporter.sendMail({
+    from: `"Bridal Orna" <${process.env.EMAIL_USER}>`,
+    to, subject, html,
+  });
+};
+
 // ---- POST /api/auth/register ----
 // Register a new user (shop or customer)
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone, role, shopName, address } = req.body;
-    const normalizedPhone = phone?.trim();
 
     // Validate required fields
-    if (!name || !email || !password || !normalizedPhone) {
-      return res.status(400).json({ message: 'Name, email, password and phone are required' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email and password are required' });
     }
 
     // Prevent registering as admin via API
@@ -44,7 +62,7 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password,
-      phone: normalizedPhone,
+      phone,
       role: role || 'customer',
       shopName,
       address,
@@ -108,79 +126,100 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ---- GET /api/auth/me ----
+router.get('/me', protect, async (req, res) => {
+  res.json({ user: req.user });
+});
+
+// ══════════════════════════════════════════
+// FORGOT PASSWORD — 3 step flow
+// ══════════════════════════════════════════
+
 // ---- POST /api/auth/forgot-password ----
-// Generate reset token and return reset link
+// Step 1: User enters email → receive OTP
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
 
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'No account found with this email address' });
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    otpStore[email] = { otp, expiresAt };
+
+    // Send OTP email
+    await sendEmail(
+      email,
+      '🌸 Bridal Orna — Password Reset OTP',
+      `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 2rem; background: #fdf8f3; border-radius: 12px; border: 1px solid #e8d5c4;">
+          <h2 style="color: #2c1a0e; font-family: Georgia, serif; text-align:center;">🌸 Bridal Orna</h2>
+          <p style="color: #3d2314;">Hello <strong>${user.name}</strong>,</p>
+          <p style="color: #6a4a3a;">Use the OTP below to reset your password:</p>
+          <div style="background: #2c1a0e; color: #f0d9c8; font-size: 2.5rem; font-weight: bold; letter-spacing: 0.75rem; text-align: center; padding: 1.25rem; border-radius: 10px; margin: 1.5rem 0;">
+            ${otp}
+          </div>
+          <p style="color: #a08070; font-size: 0.875rem; text-align: center;">⏰ Valid for <strong>10 minutes only</strong></p>
+          <p style="color: #c08070; font-size: 0.8rem; text-align: center;">If you did not request this, ignore this email.</p>
+        </div>
+      `
+    );
+
+    res.json({ message: 'OTP sent to your email! Check your inbox.' });
+  } catch (error) {
+    console.error('Forgot password error:', error.message);
+    res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+  }
+});
+
+// ---- POST /api/auth/verify-otp ----
+// Step 2: Verify the OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
+
+    const record = otpStore[email];
+    if (!record) return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
+    if (Date.now() > record.expiresAt) {
+      delete otpStore[email];
+      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
+    }
+    if (record.otp !== otp.trim()) return res.status(400).json({ message: 'Incorrect OTP. Please try again.' });
+
+    res.json({ message: 'OTP verified!', verified: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// ---- POST /api/auth/reset-password ----
+// Step 3: Set new password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) return res.status(400).json({ message: 'All fields are required' });
+    if (newPassword.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
+
+    const record = otpStore[email];
+    if (!record || Date.now() > record.expiresAt || record.otp !== otp.trim()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP. Please start over.' });
     }
 
     const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Keep response generic to avoid revealing which emails exist
-    if (!user) {
-      return res.json({ message: 'If this email exists, a password reset link has been generated.' });
-    }
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-
-    user.resetPasswordToken = resetTokenHash;
-    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
-    await user.save({ validateBeforeSave: false });
-
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
-
-    res.json({
-      message: 'Password reset link generated successfully.',
-      resetLink,
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-// ---- POST /api/auth/reset-password/:token ----
-// Reset password using valid token
-router.post('/reset-password/:token', async (req, res) => {
-  try {
-    const { token } = req.params;
-    const { password } = req.body;
-
-    if (!password || password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters.' });
-    }
-
-    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
-
-    const user = await User.findOne({
-      resetPasswordToken: resetTokenHash,
-      resetPasswordExpire: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Reset token is invalid or has expired.' });
-    }
-
-    user.password = password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    user.password = newPassword; // pre-save hook hashes it
     await user.save();
+    delete otpStore[email];
 
-    res.json({ message: 'Password reset successful. You can now log in.' });
+    res.json({ message: 'Password reset successfully! You can now login.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
-});
-
-// ---- GET /api/auth/me ----
-// Get currently logged-in user profile
-router.get('/me', protect, async (req, res) => {
-  res.json({ user: req.user });
 });
 
 module.exports = router;
