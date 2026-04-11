@@ -6,7 +6,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://bridal-orna.onrender.com';
 
 export default function ProductCard({ product }) {
   const { user } = useAuth();

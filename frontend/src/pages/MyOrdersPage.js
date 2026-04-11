@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://bridal-orna.onrender.com';
 
 export default function MyOrdersPage() {
   const { user } = useAuth();

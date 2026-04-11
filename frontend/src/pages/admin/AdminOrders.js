@@ -7,7 +7,7 @@ import axios from 'axios';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://bridal-orna.onrender.com';
 const STATUSES = ['Pending', 'In Progress', 'Delivered', 'Cancelled'];
 
 export default function AdminOrders() {

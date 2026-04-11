@@ -8,7 +8,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://bridal-orna.onrender.com';
 
 export default function BookingPage() {
   const { id } = useParams();

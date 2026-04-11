@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://bridal-orna.onrender.com';
 
 const emptyForm = {
   name: '', description: '', customerPrice: '', shopPrice: '',

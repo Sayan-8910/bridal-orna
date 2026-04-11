@@ -9,7 +9,7 @@ import axios from 'axios';
 const AuthContext = createContext();
 
 // Base API URL - uses proxy in development
-const API_BASE = '/api';
+const API_BASE = 'https://bridal-orna.onrender.com/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
