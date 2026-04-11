@@ -21,8 +21,9 @@ export default function ProductsPage() {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (category) params.append('category', category);
-      const res = await axios.get(`/api/products?${params}`);
-      setProducts(res.data);
+      const res = await axios.get(`https://bridal-orna.onrender.com/api/products?${params}`);
+      console.log("API RESPONSE:", res.data);
+      setProducts(Array.isArray(res.data) ? res.data : res.data.products || []);
     } catch (err) {
       console.error(err);
     } finally {
