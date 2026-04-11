@@ -5,8 +5,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
-
-const API_BASE = 'https://bridal-orna.onrender.com';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const emptyForm = {
   name: '', description: '', customerPrice: '', shopPrice: '',
@@ -23,12 +22,10 @@ export default function AdminProducts() {
   const [existingImages, setExistingImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [] = useState(null);
-
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/products');
+      const res = await axios.get('https://bridal-orna.onrender.com/api/products');
       setProducts(res.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -71,10 +68,10 @@ export default function AdminProducts() {
       existingImages.forEach(img => fd.append('existingImages', img));
 
       if (editProduct) {
-        await axios.put(`/api/products/${editProduct._id}`, fd);
+        await axios.put(`https://bridal-orna.onrender.com/api/products/${editProduct._id}`, fd);
         setMessage({ type: 'success', text: 'Product updated successfully!' });
       } else {
-        await axios.post('/api/products', fd);
+        await axios.post('https://bridal-orna.onrender.com/api/products', fd);
         setMessage({ type: 'success', text: 'Product added successfully!' });
       }
 
@@ -91,7 +88,7 @@ export default function AdminProducts() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
-      await axios.delete(`/api/products/${id}`);
+      await axios.delete(`https://bridal-orna.onrender.com/api/products/${id}`);
       setProducts(prev => prev.filter(p => p._id !== id));
     } catch (err) {
       alert('Failed to delete product.');
@@ -173,7 +170,7 @@ export default function AdminProducts() {
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {existingImages.map(img => (
                         <div key={img} style={{ position: 'relative' }}>
-                          <img src={`${API_BASE}${img}`} alt="existing" style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e8d5c4' }} />
+                          <img src={getImageUrl(img)} alt="existing" style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e8d5c4' }} />
                           <button type="button" onClick={() => removeExistingImage(img)} style={{
                             position: 'absolute', top: '-6px', right: '-6px',
                             width: '20px', height: '20px', borderRadius: '50%',
@@ -225,7 +222,7 @@ export default function AdminProducts() {
                     <tr key={p._id} style={{ borderBottom: '1px solid #f0e4d8', background: i % 2 === 0 ? 'white' : '#fdf8f3' }}>
                       <td style={{ padding: '0.75rem 1rem' }}>
                         {p.images?.length > 0 ? (
-                          <img src={`${API_BASE}${p.images[0]}`} alt={p.name} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e8d5c4' }} />
+                          <img src={getImageUrl(p.images[0])} alt={p.name} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e8d5c4' }} />
                         ) : <div style={{ width: '48px', height: '48px', borderRadius: '6px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🌸</div>}
                       </td>
                       <td style={{ padding: '0.75rem 1rem' }}>

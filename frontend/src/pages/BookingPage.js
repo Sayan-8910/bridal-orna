@@ -7,6 +7,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getImageUrl } from '../utils/imageUrl';
 
 const API_BASE = 'https://bridal-orna.onrender.com';
 
@@ -29,7 +30,7 @@ export default function BookingPage() {
   const [designImage, setDesignImage] = useState(null);
 
   useEffect(() => {
-    axios.get(`/api/products/${id}`)
+    axios.get(`https://bridal-orna.onrender.com/api/products/${id}`)
       .then(res => { setProduct(res.data); setLoading(false); })
       .catch(() => { setLoading(false); });
   }, [id]);
@@ -52,7 +53,7 @@ export default function BookingPage() {
       if (customDesign) formData.append('customDesignDescription', designDesc);
       if (customDesign && designImage) formData.append('designImage', designImage);
 
-      await axios.post('/api/orders', formData, {
+      await axios.post('https://bridal-orna.onrender.com/api/orders', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -93,7 +94,7 @@ export default function BookingPage() {
       {/* Product Summary */}
       <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
         {product.images?.length > 0 ? (
-          <img src={`${API_BASE}${product.images[0]}`} alt={product.name}
+          <img src={getImageUrl(product.images[0])} alt={product.name}
             style={{ width: '80px', height: '80px', borderRadius: '8px', objectFit: 'cover' }} />
         ) : (
           <div style={{ width: '80px', height: '80px', borderRadius: '8px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🌸</div>

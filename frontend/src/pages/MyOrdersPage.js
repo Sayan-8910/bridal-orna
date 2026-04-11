@@ -6,8 +6,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
-
-const API_BASE = 'https://bridal-orna.onrender.com';
+import { getImageUrl } from '../utils/imageUrl';
 
 export default function MyOrdersPage() {
   useAuth();
@@ -15,7 +14,7 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/api/orders/my')
+    axios.get('https://bridal-orna.onrender.com/api/orders/my')
       .then(res => { setOrders(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
@@ -55,7 +54,7 @@ export default function MyOrdersPage() {
                   {order.items.map((item, i) => (
                     <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                       {item.product?.images?.length > 0 ? (
-                        <img src={`${API_BASE}${item.product.images[0]}`} alt={item.productName}
+                        <img src={getImageUrl(item.product.images[0])} alt={item.productName}
                           style={{ width: '52px', height: '52px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #e8d5c4' }} />
                       ) : (
                         <div style={{ width: '52px', height: '52px', borderRadius: '8px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🌸</div>

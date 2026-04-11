@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      const res = await axios.post('/api/auth/forgot-password', { email });
+      const res = await axios.post('https://bridal-orna.onrender.com/api/auth/forgot-password', { email });
       setSuccess(res.data.message);
       setStep(2);
     } catch (err) {
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      const res = await axios.post('/api/auth/verify-otp', { email, otp });
+      const res = await axios.post('https://bridal-orna.onrender.com/api/auth/verify-otp', { email, otp });
       setSuccess(res.data.message);
       setStep(3);
     } catch (err) {
@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
     if (newPassword.length < 6) return setError('Password must be at least 6 characters.');
     setLoading(true);
     try {
-      const res = await axios.post('/api/auth/reset-password', { email, otp, newPassword });
+      const res = await axios.post('https://bridal-orna.onrender.com/api/auth/reset-password', { email, otp, newPassword });
       setSuccess(res.data.message);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
