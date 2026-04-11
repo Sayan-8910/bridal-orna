@@ -18,8 +18,8 @@ export default function ProductCard({ product }) {
 
   // First image or placeholder
   const imageUrl = product.images && product.images.length > 0
-    ? `${API_BASE}${product.images[0]}`
-    : null;
+  ? `${API_BASE}/${product.images[0].replace(/^\/+/, '')}`
+  : null;
 
   return (
     <div className="card" style={{ position: 'relative', cursor: 'pointer' }}>
