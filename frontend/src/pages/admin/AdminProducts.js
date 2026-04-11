@@ -23,7 +23,7 @@ export default function AdminProducts() {
   const [existingImages, setExistingImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [deleteId, setDeleteId] = useState(null);
+  const [] = useState(null);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);

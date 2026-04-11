@@ -10,7 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const API_BASE = 'https://bridal-orna.onrender.com';
 
 export default function MyOrdersPage() {
-  const { user } = useAuth();
+  useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
