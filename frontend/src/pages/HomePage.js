@@ -18,35 +18,60 @@ export default function HomePage() {
         overflow: 'hidden',
         background: 'linear-gradient(135deg, #1a0a04 0%, #3d1a0a 50%, #5c2d1a 100%)',
       }}>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            zIndex: 0,
+          }}
+        >
+          <source src="/videos/bridal_hero.mp4" type="video/mp4" />
+        </video>
+
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 1,
+          background: 'linear-gradient(to right, rgba(15,5,2,0.85) 0%, rgba(15,5,2,0.55) 55%, rgba(15,5,2,0.2) 100%)',
+        }} />
+
         {/* Dot pattern */}
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 0,
+          position: 'absolute', inset: 0, zIndex: 1,
           backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(201,149,106,0.1) 1px, transparent 0)',
           backgroundSize: '28px 28px',
         }} />
 
         {/* Decorative circles */}
-        <div style={{ position: 'absolute', right: '10%', top: '15%', width: '300px', height: '300px', borderRadius: '50%', border: '1px solid rgba(201,149,106,0.08)', zIndex: 0 }} />
-        <div style={{ position: 'absolute', right: '8%', top: '13%', width: '360px', height: '360px', borderRadius: '50%', border: '1px solid rgba(201,149,106,0.05)', zIndex: 0 }} />
-        <div style={{ position: 'absolute', left: '-5%', bottom: '10%', width: '200px', height: '200px', borderRadius: '50%', border: '1px solid rgba(201,149,106,0.06)', zIndex: 0 }} />
+        <div style={{ position: 'absolute', right: '10%', top: '15%', width: '300px', height: '300px', borderRadius: '50%', border: '1px solid rgba(201,149,106,0.08)', zIndex: 1 }} />
+        <div style={{ position: 'absolute', right: '8%', top: '13%', width: '360px', height: '360px', borderRadius: '50%', border: '1px solid rgba(201,149,106,0.05)', zIndex: 1 }} />
+        <div style={{ position: 'absolute', left: '-5%', bottom: '10%', width: '200px', height: '200px', borderRadius: '50%', border: '1px solid rgba(201,149,106,0.06)', zIndex: 1 }} />
 
         {/* Rose gold accent bar */}
         <div style={{
           position: 'absolute', left: 0, top: '20%', bottom: '20%',
           width: '4px',
           background: 'linear-gradient(to bottom, transparent, #c9956a, #f0d9c8, #c9956a, transparent)',
-          borderRadius: '2px', zIndex: 1,
+          borderRadius: '2px', zIndex: 2,
         }} />
 
         {/* Bottom fade */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
-          height: '150px', zIndex: 1,
+          height: '150px', zIndex: 2,
           background: 'linear-gradient(to top, #fdf8f3, transparent)',
         }} />
 
         {/* Content */}
-        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '5rem 1.5rem' }}>
+        <div className="container" style={{ position: 'relative', zIndex: 3, padding: '5rem 1.5rem' }}>
           <div style={{ maxWidth: '640px' }}>
             <p style={{
               color: '#c9956a', fontFamily: 'DM Sans, sans-serif',
