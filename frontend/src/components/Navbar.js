@@ -74,7 +74,7 @@ export default function Navbar() {
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span style={{ color: '#f0d9c8', fontSize: '0.85rem' }}>
-                  👤 {user.name.split(' ')[0]}
+                  👤 {user?.name ? user.name.split(' ')[0] : 'User'}
                   {user.role === 'shop' && <span style={{ color: '#c9956a', fontSize: '0.75rem', marginLeft: '4px' }}>(Shop)</span>}
                 </span>
                 <button onClick={handleLogout} className="btn btn-outline btn-sm" style={{ color: '#c9956a', borderColor: '#c9956a' }}>

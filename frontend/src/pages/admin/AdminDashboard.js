@@ -10,7 +10,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('https://bridal-orna.onrender.com/api/admin/dashboard')
+    axios.get('/api/admin/dashboard')
       .then(res => { setStats(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);

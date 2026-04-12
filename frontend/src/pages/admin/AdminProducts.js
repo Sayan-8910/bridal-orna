@@ -5,8 +5,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
-
-const API_BASE = 'https://bridal-orna.onrender.com';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const emptyForm = {
   name: '', description: '', customerPrice: '', shopPrice: '',
@@ -173,7 +172,7 @@ export default function AdminProducts() {
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {existingImages.map(img => (
                         <div key={img} style={{ position: 'relative' }}>
-                          <img src={img} alt="existing" style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e8d5c4' }} />
+                          <img src={getImageUrl(img)} alt="existing" style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e8d5c4' }} />
                           <button type="button" onClick={() => removeExistingImage(img)} style={{
                             position: 'absolute', top: '-6px', right: '-6px',
                             width: '20px', height: '20px', borderRadius: '50%',
@@ -225,7 +224,7 @@ export default function AdminProducts() {
                     <tr key={p._id} style={{ borderBottom: '1px solid #f0e4d8', background: i % 2 === 0 ? 'white' : '#fdf8f3' }}>
                       <td style={{ padding: '0.75rem 1rem' }}>
                         {p.images?.length > 0 ? (
-                          <img src={p.images[0]} alt={p.name} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e8d5c4' }} />
+                          <img src={getImageUrl(p.images[0])} alt={p.name} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e8d5c4' }} />
                         ) : <div style={{ width: '48px', height: '48px', borderRadius: '6px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🌸</div>}
                       </td>
                       <td style={{ padding: '0.75rem 1rem' }}>
