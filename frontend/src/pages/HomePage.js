@@ -2,24 +2,11 @@
 // pages/HomePage.js
 // =============================================
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import ProductCard from '../components/ProductCard';
 import WhatsAppButton from '../components/WhatsAppButton';
-import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function HomePage() {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    axios.get('https://bridal-orna.onrender.com/api/products?limit=6')
-      .then(res => setFeaturedProducts(res.data.slice(0, 6)))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
   // ── Put your bridal model image inside:
   // frontend/src/assets/hero-model.jpg  (or .png / .webp)
   // Any photo of a bride wearing your orna/dupatta works perfectly.
@@ -131,68 +118,44 @@ export default function HomePage() {
           background: 'linear-gradient(135deg, #2c1a0e, #6b3a1f)',
           overflow: 'hidden',
         }}>
-          {heroBg ? (
-            <>
-              {/* Actual model photo */}
-              <img
-                src={heroBg}
-                alt="Bride wearing beautiful bridal orna"
-                style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover', objectPosition: 'center top',
-                  display: 'block',
-                }}
-              />
-              {/* Gradient overlay — left edge blends into text side */}
+            {heroBg ? (
+              <>
+                <img
+                  src={heroBg}
+                  alt="Bride wearing beautiful bridal orna"
+                  style={{
+                    width: '100%', height: '100%',
+                    objectFit: 'cover', objectPosition: 'center top',
+                    display: 'block',
+                  }}
+                />
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(to right, #1a0a04 0%, transparent 30%)',
+                  pointerEvents: 'none',
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%',
+                  background: 'linear-gradient(to top, rgba(26,10,4,0.6), transparent)',
+                  pointerEvents: 'none',
+                }} />
+              </>
+            ) : (
               <div style={{
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(to right, #1a0a04 0%, transparent 30%)',
-                pointerEvents: 'none',
-              }} />
-              {/* Bottom fade */}
-              <div style={{
-                position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%',
-                background: 'linear-gradient(to top, rgba(26,10,4,0.6), transparent)',
-                pointerEvents: 'none',
-              }} />
-            </>
-          ) : (
-            /* ── Placeholder shown when no image is added yet ── */
-            <div style={{
-              width: '100%', height: '100%', minHeight: '500px',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              background: 'linear-gradient(160deg, #2c1a0e, #6b3a1f)',
-              gap: '1.5rem', padding: '3rem',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '5rem', opacity: 0.4 }}>👰</div>
-              <div style={{
-                border: '2px dashed rgba(201,149,106,0.4)',
-                borderRadius: '16px', padding: '2rem 2.5rem',
-                maxWidth: '320px',
+                width: '100%', height: '100%', minHeight: '500px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'radial-gradient(circle at 30% 30%, rgba(201,149,106,0.22), transparent 35%), linear-gradient(160deg, #2c1a0e, #6b3a1f)',
+                padding: '3rem',
               }}>
-                <p style={{ color: '#c9956a', fontWeight: '600', marginBottom: '0.5rem' }}>
-                  📸 Add Your Model Photo
-                </p>
-                <p style={{ color: '#8a6050', fontSize: '0.85rem', lineHeight: 1.6 }}>
-                  Place your bridal orna model image at:
-                </p>
-                <code style={{
-                  display: 'block', marginTop: '0.75rem',
-                  background: 'rgba(201,149,106,0.1)', padding: '0.5rem 0.75rem',
-                  borderRadius: '6px', fontSize: '0.75rem', color: '#f0d9c8',
-                  wordBreak: 'break-all',
-                }}>
-                  frontend/src/assets/<br/>hero-model.jpg
-                </code>
-                <p style={{ color: '#8a6050', fontSize: '0.8rem', marginTop: '0.75rem' }}>
-                  Supports .jpg .png .webp<br/>
-                  Best size: 800×1200px (portrait)
-                </p>
+                <div style={{
+                  width: '78%', maxWidth: '340px', aspectRatio: '3 / 4',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(201,149,106,0.25)',
+                  background: 'linear-gradient(180deg, rgba(253,248,243,0.08), rgba(253,248,243,0.02))',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+                }} />
               </div>
-            </div>
-          )}
+            )}
 
           {/* Decorative corner flourish */}
           <div style={{
@@ -217,78 +180,6 @@ export default function HomePage() {
             section { flex-direction: column !important; }
           }
         `}</style>
-      </section>
-
-      {/* ── Features ── */}
-      <section style={{ background: '#f5ede3', padding: '3rem 0' }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-            {[
-              ['🚚', 'Cash on Delivery', 'Pay when you receive. No online payment needed.'],
-              ['🏷️', 'Shop Bulk Pricing', 'Special lower prices for registered shops.'],
-              ['🎨', 'Custom Designs', 'Request a custom design with your own reference image.'],
-              ['💬', 'WhatsApp Support', 'Reach us directly on WhatsApp anytime.'],
-            ].map(([icon, title, desc]) => (
-              <div key={title} style={{
-                background: 'white', borderRadius: '12px', padding: '1.5rem',
-                textAlign: 'center', boxShadow: '0 2px 8px rgba(44,26,14,0.06)',
-                border: '1px solid #e8d5c4',
-              }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{icon}</div>
-                <h3 style={{ fontSize: '1rem', marginBottom: '0.4rem', color: '#2c1a0e' }}>{title}</h3>
-                <p style={{ fontSize: '0.85rem', color: '#a08070' }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Featured Products ── */}
-      <section className="section-padding">
-        <div className="container">
-          <div className="section-title">
-            <h2>Featured Collection</h2>
-            <p style={{ color: '#a08070', marginTop: '0.5rem' }}>Our most loved bridal dupattas</p>
-          </div>
-
-          {loading ? (
-            <LoadingSpinner />
-          ) : featuredProducts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#a08070' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🌸</div>
-              <p>Products will appear here once added by the admin.</p>
-            </div>
-          ) : (
-            <div className="products-grid">
-              {featuredProducts.map(p => <ProductCard key={p._id} product={p} />)}
-            </div>
-          )}
-
-          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-            <Link to="/products" className="btn btn-outline btn-lg">
-              View All Products →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA Shop ── */}
-      <section style={{
-        background: 'linear-gradient(135deg, #c9956a, #a0714f)',
-        padding: '4rem 0',
-        textAlign: 'center',
-      }}>
-        <div className="container">
-          <h2 style={{ color: 'white', fontFamily: 'Playfair Display, serif', marginBottom: '1rem' }}>
-            Are You a Shop Owner?
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: '2rem', fontSize: '1.05rem' }}>
-            Register as a shop to get exclusive bulk pricing on all products.
-          </p>
-          <Link to="/register" className="btn btn-lg" style={{ background: 'white', color: '#c9956a', fontWeight: '600' }}>
-            Register as Shop →
-          </Link>
-        </div>
       </section>
 
       <WhatsAppButton />
