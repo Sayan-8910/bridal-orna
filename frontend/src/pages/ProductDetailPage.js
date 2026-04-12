@@ -8,7 +8,6 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import WhatsAppButton from '../components/WhatsAppButton';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { getImageUrl } from '../utils/imageUrl';
 
 const API_BASE = 'https://bridal-orna.onrender.com';
 
@@ -23,7 +22,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    axios.get(`https://bridal-orna.onrender.com/api/products/${id}`)
+    axios.get(`/api/products/${id}`)
       .then(res => { setProduct(res.data); setLoading(false); })
       .catch(() => { setLoading(false); });
   }, [id]);
@@ -67,7 +66,7 @@ export default function ProductDetailPage() {
             }}>
               {product.images && product.images.length > 0 ? (
                 <img
-                  src={getImageUrl(product.images[selectedImage])}
+                  src={product.images[selectedImage]}
                   alt={product.name}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
@@ -92,7 +91,7 @@ export default function ProductDetailPage() {
                     border: selectedImage === i ? '2px solid #c9956a' : '2px solid #e8d5c4',
                     cursor: 'pointer', padding: 0, background: 'none',
                   }}>
-                    <img src={getImageUrl(img)} alt={`view ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={img} alt={`view ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </button>
                 ))}
               </div>
@@ -109,11 +108,11 @@ export default function ProductDetailPage() {
             {/* Price */}
             <div style={{ marginBottom: '1.25rem' }}>
               <span style={{ fontSize: '2rem', fontWeight: '700', color: '#c9956a' }}>
-                ₹{price?.toLocaleString()}
+                ৳{price?.toLocaleString()}
               </span>
               {user?.role === 'shop' && (
                 <span style={{ marginLeft: '0.75rem', fontSize: '0.85rem', color: '#a08070', textDecoration: 'line-through' }}>
-                  ₹{product.customerPrice?.toLocaleString()} retail
+                  ৳{product.customerPrice?.toLocaleString()} retail
                 </span>
               )}
               {user?.role === 'shop' && (
@@ -171,7 +170,7 @@ export default function ProductDetailPage() {
                     }}
                   >+</button>
                   <span style={{ color: '#a08070', fontSize: '0.85rem' }}>
-                    Total: ₹{(price * quantity)?.toLocaleString()}
+                    Total: ৳{(price * quantity)?.toLocaleString()}
                   </span>
                 </div>
               </div>

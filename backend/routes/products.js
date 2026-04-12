@@ -69,8 +69,8 @@ router.post('/', protect, adminOnly, (req, res) => {
         return res.status(400).json({ message: 'Name, customer price, and shop price are required' });
       }
 
-      // Get uploaded image paths
-      const images = req.files ? req.files.map((f) => '/uploads/products/' + f.filename) : [];
+      // Get Cloudinary image URLs (path is now a full URL from Cloudinary)
+      const images = req.files ? req.files.map((f) => f.path) : [];
 
       const product = await Product.create({
         name,
@@ -116,7 +116,7 @@ router.put('/:id', protect, adminOnly, (req, res) => {
         images = Array.isArray(existingImages) ? existingImages : [existingImages];
       }
       if (req.files && req.files.length > 0) {
-        const newImages = req.files.map((f) => '/uploads/products/' + f.filename);
+        const newImages = req.files.map((f) => f.path); // Cloudinary full URL
         images = [...images, ...newImages];
       }
       if (images.length > 0) product.images = images;

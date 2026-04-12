@@ -7,7 +7,6 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { getImageUrl } from '../utils/imageUrl';
 
 const API_BASE = 'https://bridal-orna.onrender.com';
 
@@ -30,7 +29,7 @@ export default function BookingPage() {
   const [designImage, setDesignImage] = useState(null);
 
   useEffect(() => {
-    axios.get(`https://bridal-orna.onrender.com/api/products/${id}`)
+    axios.get(`/api/products/${id}`)
       .then(res => { setProduct(res.data); setLoading(false); })
       .catch(() => { setLoading(false); });
   }, [id]);
@@ -53,7 +52,7 @@ export default function BookingPage() {
       if (customDesign) formData.append('customDesignDescription', designDesc);
       if (customDesign && designImage) formData.append('designImage', designImage);
 
-      await axios.post('https://bridal-orna.onrender.com/api/orders', formData, {
+      await axios.post('/api/orders', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -94,14 +93,14 @@ export default function BookingPage() {
       {/* Product Summary */}
       <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
         {product.images?.length > 0 ? (
-          <img src={getImageUrl(product.images[0])} alt={product.name}
+          <img src={product.images[0]} alt={product.name}
             style={{ width: '80px', height: '80px', borderRadius: '8px', objectFit: 'cover' }} />
         ) : (
           <div style={{ width: '80px', height: '80px', borderRadius: '8px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🌸</div>
         )}
         <div style={{ flex: 1 }}>
           <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.05rem' }}>{product.name}</h3>
-          <p style={{ color: '#c9956a', fontWeight: '600' }}>₹{price?.toLocaleString()} per piece</p>
+          <p style={{ color: '#c9956a', fontWeight: '600' }}>৳{price?.toLocaleString()} per piece</p>
           {user?.role === 'shop' && <span className="badge badge-rose" style={{ fontSize: '0.7rem' }}>Shop Price</span>}
         </div>
       </div>
@@ -164,7 +163,7 @@ export default function BookingPage() {
           <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1rem', marginBottom: '0.75rem' }}>Order Summary</h3>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
             <span style={{ color: '#6a4a3a' }}>{product.name} × {quantity}</span>
-            <span style={{ fontWeight: '600' }}>₹{total.toLocaleString()}</span>
+            <span style={{ fontWeight: '600' }}>৳{total.toLocaleString()}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
             <span style={{ color: '#6a4a3a' }}>Payment</span>
@@ -173,7 +172,7 @@ export default function BookingPage() {
           <hr style={{ border: 'none', borderTop: '1px solid #e8d5c4', margin: '0.75rem 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ fontWeight: '700', color: '#2c1a0e' }}>Total</span>
-            <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#c9956a' }}>₹{total.toLocaleString()}</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#c9956a' }}>৳{total.toLocaleString()}</span>
           </div>
         </div>
 
@@ -183,7 +182,7 @@ export default function BookingPage() {
         </div>
 
         <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={submitting}>
-          {submitting ? 'Placing Order…' : `✅ Confirm Order — ₹${total.toLocaleString()}`}
+          {submitting ? 'Placing Order…' : `✅ Confirm Order — ৳${total.toLocaleString()}`}
         </button>
       </form>
     </div>

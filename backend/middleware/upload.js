@@ -1,63 +1,61 @@
 // =============================================
-// middleware/upload.js - File Upload Config (Multer)
+// middleware/upload.js - Cloudinary Image Upload
 // =============================================
 
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
-// Ensure upload directories exist
-const productUploadDir = path.join(__dirname, '../uploads/products');
-const designUploadDir = path.join(__dirname, '../uploads/designs');
+// Configure Cloudinary with env credentials
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-if (!fs.existsSync(productUploadDir)) fs.mkdirSync(productUploadDir, { recursive: true });
-if (!fs.existsSync(designUploadDir)) fs.mkdirSync(designUploadDir, { recursive: true });
-
-// Storage config for product images
-const productStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, productUploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename: fieldname-timestamp.ext
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
+// ---- Storage for product images ----
+const productStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'bridal-orna/products',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 800, height: 800, crop: 'limit', quality: 'auto' }],
   },
 });
 
-// Storage config for custom design images
-const designStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, designUploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'design-' + uniqueSuffix + path.extname(file.originalname));
+// ---- Storage for custom design images ----
+const designStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'bridal-orna/designs',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, height: 1200, crop: 'limit', quality: 'auto' }],
   },
 });
 
-// File type filter - only allow images
+// File type filter - only images
 const imageFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
-  const isValid = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const allowedTypes = /jpeg|jpg|png|webp/;
+  const isValid = allowedTypes.test(file.mimetype);
   if (isValid) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+    cb(new Error('Only image files are allowed (jpeg, jpg, png, webp)'));
   }
 };
 
-// Upload middleware instances
+// Upload middleware — product images (up to 10)
 const uploadProductImages = multer({
   storage: productStorage,
   fileFilter: imageFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
-}).array('images', 10); // Accept up to 10 images with field name 'images'
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).array('images', 10);
 
+// Upload middleware — single design image
 const uploadDesignImage = multer({
   storage: designStorage,
   fileFilter: imageFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
-}).single('designImage'); // Single design reference image
+}).single('designImage');
 
-module.exports = { uploadProductImages, uploadDesignImage };
+module.exports = { uploadProductImages, uploadDesignImage, cloudinary };

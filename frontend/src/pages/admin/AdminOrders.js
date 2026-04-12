@@ -6,8 +6,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { getImageUrl } from '../../utils/imageUrl';
 
+const API_BASE = 'https://bridal-orna.onrender.com';
 const STATUSES = ['Pending', 'In Progress', 'Delivered', 'Cancelled'];
 
 export default function AdminOrders() {
@@ -24,7 +24,7 @@ export default function AdminOrders() {
       const params = new URLSearchParams();
       if (roleFilter !== 'all') params.append('role', roleFilter);
       if (statusFilter !== 'all') params.append('status', statusFilter);
-      const res = await axios.get(`https://bridal-orna.onrender.com/api/admin/orders?${params}`);
+      const res = await axios.get(`/api/admin/orders?${params}`);
       setOrders(res.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -35,7 +35,7 @@ export default function AdminOrders() {
   const updateStatus = async (orderId, newStatus) => {
     setUpdatingId(orderId);
     try {
-      await axios.put(`https://bridal-orna.onrender.com/api/admin/orders/${orderId}/status`, { status: newStatus });
+      await axios.put(`/api/admin/orders/${orderId}/status`, { status: newStatus });
       setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
     } catch (e) { alert('Failed to update status.'); }
     finally { setUpdatingId(null); }
@@ -108,7 +108,7 @@ export default function AdminOrders() {
 
                   <div style={{ flex: 1, minWidth: '120px' }}>
                     <p style={{ fontSize: '0.75rem', color: '#a08070' }}>Amount</p>
-                    <p style={{ fontSize: '1.05rem', fontWeight: '700', color: '#c9956a' }}>₹{order.totalAmount?.toLocaleString()}</p>
+                    <p style={{ fontSize: '1.05rem', fontWeight: '700', color: '#c9956a' }}>৳{order.totalAmount?.toLocaleString()}</p>
                   </div>
 
                   <div style={{ flex: 1, minWidth: '120px' }}>
@@ -159,13 +159,13 @@ export default function AdminOrders() {
                         {order.items.map((item, i) => (
                           <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
                             {item.product?.images?.length > 0 ? (
-                              <img src={getImageUrl(item.product.images[0])} alt={item.productName} style={{ width: '44px', height: '44px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #e8d5c4' }} />
+                              <img src={item.product.images[0]} alt={item.productName} style={{ width: '44px', height: '44px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #e8d5c4' }} />
                             ) : <div style={{ width: '44px', height: '44px', borderRadius: '6px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🌸</div>}
                             <div style={{ flex: 1, fontSize: '0.85rem' }}>
                               <p style={{ fontWeight: '600', color: '#2c1a0e' }}>{item.productName}</p>
-                              <p style={{ color: '#a08070' }}>Qty: {item.quantity} × ₹{item.pricePerUnit?.toLocaleString()}</p>
+                              <p style={{ color: '#a08070' }}>Qty: {item.quantity} × ৳{item.pricePerUnit?.toLocaleString()}</p>
                             </div>
-                            <p style={{ fontWeight: '700', color: '#c9956a', fontSize: '0.9rem' }}>₹{item.totalPrice?.toLocaleString()}</p>
+                            <p style={{ fontWeight: '700', color: '#c9956a', fontSize: '0.9rem' }}>৳{item.totalPrice?.toLocaleString()}</p>
                           </div>
                         ))}
                       </div>
@@ -177,8 +177,8 @@ export default function AdminOrders() {
                             <h4 style={{ fontSize: '0.875rem', color: '#7b2d8b', marginBottom: '0.5rem', fontFamily: 'Playfair Display, serif' }}>🎨 Custom Design Request</h4>
                             {order.customDesign.description && <p style={{ fontSize: '0.85rem', color: '#6a4a3a', marginBottom: '0.5rem' }}>{order.customDesign.description}</p>}
                             {order.customDesign.imagePath && (
-                              <a href={getImageUrl(order.customDesign.imagePath)} target="_blank" rel="noreferrer">
-                                <img src={getImageUrl(order.customDesign.imagePath)} alt="Design reference"
+                              <a href={order.customDesign.imagePath} target="_blank" rel="noreferrer">
+                                <img src={order.customDesign.imagePath} alt="Design reference"
                                   style={{ maxWidth: '120px', borderRadius: '8px', border: '1px solid #e8d5c4' }} />
                               </a>
                             )}
@@ -193,7 +193,7 @@ export default function AdminOrders() {
                         <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#fdf8f3', borderRadius: '8px', border: '1px solid #e8d5c4' }}>
                           <p style={{ fontSize: '0.8rem', color: '#6a4a3a' }}>💳 {order.paymentMethod}</p>
                           <p style={{ fontSize: '1rem', fontWeight: '700', color: '#c9956a', marginTop: '0.25rem' }}>
-                            Total: ₹{order.totalAmount?.toLocaleString()}
+                            Total: ৳{order.totalAmount?.toLocaleString()}
                           </p>
                         </div>
                       </div>

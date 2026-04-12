@@ -6,15 +6,16 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import OrderStatusBadge from '../components/OrderStatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { getImageUrl } from '../utils/imageUrl';
+
+const API_BASE = 'https://bridal-orna.onrender.com';
 
 export default function MyOrdersPage() {
-  useAuth();
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('https://bridal-orna.onrender.com/api/orders/my')
+    axios.get('/api/orders/my')
       .then(res => { setOrders(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
@@ -54,16 +55,16 @@ export default function MyOrdersPage() {
                   {order.items.map((item, i) => (
                     <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                       {item.product?.images?.length > 0 ? (
-                        <img src={getImageUrl(item.product.images[0])} alt={item.productName}
+                        <img src={item.product.images[0]} alt={item.productName}
                           style={{ width: '52px', height: '52px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #e8d5c4' }} />
                       ) : (
                         <div style={{ width: '52px', height: '52px', borderRadius: '8px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🌸</div>
                       )}
                       <div style={{ flex: 1 }}>
                         <p style={{ fontWeight: '500', color: '#2c1a0e', fontSize: '0.9rem' }}>{item.productName}</p>
-                        <p style={{ fontSize: '0.8rem', color: '#a08070' }}>Qty: {item.quantity} × ₹{item.pricePerUnit?.toLocaleString()}</p>
+                        <p style={{ fontSize: '0.8rem', color: '#a08070' }}>Qty: {item.quantity} × ৳{item.pricePerUnit?.toLocaleString()}</p>
                       </div>
-                      <p style={{ fontWeight: '600', color: '#c9956a' }}>₹{item.totalPrice?.toLocaleString()}</p>
+                      <p style={{ fontWeight: '600', color: '#c9956a' }}>৳{item.totalPrice?.toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
@@ -85,7 +86,7 @@ export default function MyOrdersPage() {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ fontSize: '0.75rem', color: '#a08070' }}>Total</p>
-                    <p style={{ fontWeight: '700', fontSize: '1.1rem', color: '#c9956a' }}>₹{order.totalAmount?.toLocaleString()}</p>
+                    <p style={{ fontWeight: '700', fontSize: '1.1rem', color: '#c9956a' }}>৳{order.totalAmount?.toLocaleString()}</p>
                   </div>
                 </div>
               </div>

@@ -69,7 +69,7 @@ router.post('/', protect, (req, res) => {
       const customDesign = {
         requested: customDesignRequested === 'true' || customDesignRequested === true,
         description: customDesignDescription || '',
-        imagePath: req.file ? '/uploads/designs/' + req.file.filename : '',
+        imagePath: req.file ? req.file.path : '', // Cloudinary full URL
       };
 
       // Create the order

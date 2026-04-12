@@ -5,7 +5,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getImageUrl } from '../utils/imageUrl';
+
+const API_BASE = 'https://bridal-orna.onrender.com';
 
 export default function ProductCard({ product }) {
   const { user } = useAuth();
@@ -15,10 +16,10 @@ export default function ProductCard({ product }) {
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock < 5;
 
-  // First image or placeholder
+  // Images are now full Cloudinary URLs
   const imageUrl = product.images && product.images.length > 0
-  ? getImageUrl(product.images[0])
-  : null;
+    ? product.images[0]
+    : null;
 
   return (
     <div className="card" style={{ position: 'relative', cursor: 'pointer' }}>
@@ -95,7 +96,7 @@ export default function ProductCard({ product }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem' }}>
           <div>
             <span style={{ fontSize: '1.15rem', fontWeight: '700', color: '#c9956a' }}>
-              ₹{price?.toLocaleString()}
+              ৳{price?.toLocaleString()}
             </span>
             {user?.role === 'shop' && (
               <span style={{ fontSize: '0.7rem', color: '#a08070', marginLeft: '4px' }}>shop price</span>
