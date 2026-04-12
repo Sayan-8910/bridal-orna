@@ -114,49 +114,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section style={{ background: '#f5ede3', padding: '3rem 0' }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-            {[
-              ['🚚', 'Cash on Delivery', 'Pay when you receive. No online payment needed.'],
-              ['🏷️', 'Shop Bulk Pricing', 'Special lower prices for registered shops.'],
-              ['🎨', 'Custom Designs', 'Request a custom design with your reference image.'],
-              ['💬', 'WhatsApp Support', 'Reach us directly on WhatsApp anytime.'],
-            ].map(([icon, title, desc]) => (
-              <div key={title} style={{
-                background: 'white', borderRadius: '12px', padding: '1.5rem',
-                textAlign: 'center', boxShadow: '0 2px 8px rgba(44,26,14,0.06)',
-                border: '1px solid #e8d5c4',
-              }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{icon}</div>
-                <h3 style={{ fontSize: '1rem', marginBottom: '0.4rem', color: '#2c1a0e' }}>{title}</h3>
-                <p style={{ fontSize: '0.85rem', color: '#a08070' }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Shop CTA */}
-      <section style={{
-        background: 'linear-gradient(135deg, #c9956a, #a0714f)',
-        padding: '4rem 0', textAlign: 'center',
-      }}>
-        <div className="container">
-          <h2 style={{ color: 'white', fontFamily: 'Playfair Display, serif', marginBottom: '1rem' }}>
-            Are You a Shop Owner?
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: '2rem', fontSize: '1.05rem' }}>
-            Register as a shop to get exclusive bulk pricing on all products.
-          </p>
-          <Link to="/register" className="btn btn-lg"
-            style={{ background: 'white', color: '#c9956a', fontWeight: '600' }}>
-            Register as Shop →
-          </Link>
-        </div>
-      </section>
-
       <WhatsAppButton />
     </div>
   );
