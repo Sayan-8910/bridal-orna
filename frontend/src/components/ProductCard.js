@@ -5,8 +5,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-const API_BASE = 'https://bridal-orna.onrender.com';
+import { getImageUrl } from '../utils/imageUrl';
 
 export default function ProductCard({ product }) {
   const { user } = useAuth();
@@ -18,7 +17,7 @@ export default function ProductCard({ product }) {
 
   // Images are now full Cloudinary URLs
   const imageUrl = product.images && product.images.length > 0
-    ? product.images[0]
+    ? getImageUrl(product.images[0])
     : null;
 
   return (
