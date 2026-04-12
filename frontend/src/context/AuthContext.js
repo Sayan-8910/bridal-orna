@@ -60,6 +60,12 @@ export const AuthProvider = ({ children }) => {
     return newUser;
   };
 
+  const updateProfile = async (profileData) => {
+    const res = await axios.put(`${API_BASE}/auth/me`, profileData);
+    setUser(res.data.user);
+    return res.data.user;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -68,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

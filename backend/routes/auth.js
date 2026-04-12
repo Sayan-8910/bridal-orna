@@ -131,6 +131,47 @@ router.get('/me', protect, async (req, res) => {
   res.json({ user: req.user });
 });
 
+// ---- PUT /api/auth/me ----
+// Update logged-in user's profile
+router.put('/me', protect, async (req, res) => {
+  try {
+    const { name, email, phone, address, shopName } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+        return res.status(400).json({ message: 'Email is already in use by another account' });
+      }
+      user.email = email;
+    }
+
+    if (name !== undefined) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (address !== undefined) user.address = address;
+    if (user.role === 'shop' && shopName !== undefined) user.shopName = shopName;
+
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        shopName: user.shopName,
+        phone: user.phone,
+        address: user.address,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // ══════════════════════════════════════════
 // FORGOT PASSWORD — 3 step flow
 // ══════════════════════════════════════════

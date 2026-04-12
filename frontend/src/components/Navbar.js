@@ -70,7 +70,10 @@ export default function Navbar() {
                   <Link to="/admin/orders" style={linkStyle(isActive('/admin/orders'))}>Orders</Link>
                 </>
               ) : (
-                <Link to="/my-orders" style={linkStyle(isActive('/my-orders'))}>My Orders</Link>
+                <>
+                  <Link to="/my-orders" style={linkStyle(isActive('/my-orders'))}>My Orders</Link>
+                  <Link to="/profile" style={linkStyle(isActive('/profile'))}>Profile</Link>
+                </>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span style={{ color: '#f0d9c8', fontSize: '0.85rem' }}>
@@ -108,6 +111,7 @@ export default function Navbar() {
           {user ? (
             <>
               {user.role !== 'admin' && <Link to="/my-orders" style={{ display: 'block', padding: '0.75rem 0', color: '#f0d9c8', borderBottom: '1px solid rgba(201,149,106,0.2)' }} onClick={() => setMenuOpen(false)}>My Orders</Link>}
+              {user.role !== 'admin' && <Link to="/profile" style={{ display: 'block', padding: '0.75rem 0', color: '#f0d9c8', borderBottom: '1px solid rgba(201,149,106,0.2)' }} onClick={() => setMenuOpen(false)}>Profile</Link>}
               {user.role === 'admin' && <>
                 <Link to="/admin" style={{ display: 'block', padding: '0.75rem 0', color: '#f0d9c8', borderBottom: '1px solid rgba(201,149,106,0.2)' }} onClick={() => setMenuOpen(false)}>Dashboard</Link>
                 <Link to="/admin/products" style={{ display: 'block', padding: '0.75rem 0', color: '#f0d9c8', borderBottom: '1px solid rgba(201,149,106,0.2)' }} onClick={() => setMenuOpen(false)}>Manage Products</Link>
