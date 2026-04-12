@@ -95,7 +95,7 @@ export default function ProductCard({ product }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem' }}>
           <div>
             <span style={{ fontSize: '1.15rem', fontWeight: '700', color: '#c9956a' }}>
-              ৳{price?.toLocaleString()}
+              ₹{price?.toLocaleString()}
             </span>
             {user?.role === 'shop' && (
               <span style={{ fontSize: '0.7rem', color: '#a08070', marginLeft: '4px' }}>shop price</span>

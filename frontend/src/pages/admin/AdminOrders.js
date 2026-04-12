@@ -109,7 +109,7 @@ export default function AdminOrders() {
 
                   <div style={{ flex: 1, minWidth: '120px' }}>
                     <p style={{ fontSize: '0.75rem', color: '#a08070' }}>Amount</p>
-                    <p style={{ fontSize: '1.05rem', fontWeight: '700', color: '#c9956a' }}>৳{order.totalAmount?.toLocaleString()}</p>
+                    <p style={{ fontSize: '1.05rem', fontWeight: '700', color: '#c9956a' }}>₹{order.totalAmount?.toLocaleString()}</p>
                   </div>
 
                   <div style={{ flex: 1, minWidth: '120px' }}>
@@ -164,9 +164,9 @@ export default function AdminOrders() {
                             ) : <div style={{ width: '44px', height: '44px', borderRadius: '6px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🌸</div>}
                             <div style={{ flex: 1, fontSize: '0.85rem' }}>
                               <p style={{ fontWeight: '600', color: '#2c1a0e' }}>{item.productName}</p>
-                              <p style={{ color: '#a08070' }}>Qty: {item.quantity} × ৳{item.pricePerUnit?.toLocaleString()}</p>
+                              <p style={{ color: '#a08070' }}>Qty: {item.quantity} × ₹{item.pricePerUnit?.toLocaleString()}</p>
                             </div>
-                            <p style={{ fontWeight: '700', color: '#c9956a', fontSize: '0.9rem' }}>৳{item.totalPrice?.toLocaleString()}</p>
+                            <p style={{ fontWeight: '700', color: '#c9956a', fontSize: '0.9rem' }}>₹{item.totalPrice?.toLocaleString()}</p>
                           </div>
                         ))}
                       </div>
@@ -194,7 +194,7 @@ export default function AdminOrders() {
                         <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#fdf8f3', borderRadius: '8px', border: '1px solid #e8d5c4' }}>
                           <p style={{ fontSize: '0.8rem', color: '#6a4a3a' }}>💳 {order.paymentMethod}</p>
                           <p style={{ fontSize: '1rem', fontWeight: '700', color: '#c9956a', marginTop: '0.25rem' }}>
-                            Total: ৳{order.totalAmount?.toLocaleString()}
+                            Total: ₹{order.totalAmount?.toLocaleString()}
                           </p>
                         </div>
                       </div>

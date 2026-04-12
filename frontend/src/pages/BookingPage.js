@@ -100,7 +100,7 @@ export default function BookingPage() {
         )}
         <div style={{ flex: 1 }}>
           <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.05rem' }}>{product.name}</h3>
-          <p style={{ color: '#c9956a', fontWeight: '600' }}>৳{price?.toLocaleString()} per piece</p>
+          <p style={{ color: '#c9956a', fontWeight: '600' }}>₹{price?.toLocaleString()} per piece</p>
           {user?.role === 'shop' && <span className="badge badge-rose" style={{ fontSize: '0.7rem' }}>Shop Price</span>}
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function BookingPage() {
           <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1rem', marginBottom: '0.75rem' }}>Order Summary</h3>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
             <span style={{ color: '#6a4a3a' }}>{product.name} × {quantity}</span>
-            <span style={{ fontWeight: '600' }}>৳{total.toLocaleString()}</span>
+            <span style={{ fontWeight: '600' }}>₹{total.toLocaleString()}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
             <span style={{ color: '#6a4a3a' }}>Payment</span>
@@ -172,7 +172,7 @@ export default function BookingPage() {
           <hr style={{ border: 'none', borderTop: '1px solid #e8d5c4', margin: '0.75rem 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ fontWeight: '700', color: '#2c1a0e' }}>Total</span>
-            <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#c9956a' }}>৳{total.toLocaleString()}</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#c9956a' }}>₹{total.toLocaleString()}</span>
           </div>
         </div>
 
@@ -182,7 +182,7 @@ export default function BookingPage() {
         </div>
 
         <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={submitting}>
-          {submitting ? 'Placing Order…' : `✅ Confirm Order — ৳${total.toLocaleString()}`}
+          {submitting ? 'Placing Order…' : `✅ Confirm Order — ₹${total.toLocaleString()}`}
         </button>
       </form>
     </div>

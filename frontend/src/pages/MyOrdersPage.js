@@ -62,9 +62,9 @@ export default function MyOrdersPage() {
                       )}
                       <div style={{ flex: 1 }}>
                         <p style={{ fontWeight: '500', color: '#2c1a0e', fontSize: '0.9rem' }}>{item.productName}</p>
-                        <p style={{ fontSize: '0.8rem', color: '#a08070' }}>Qty: {item.quantity} × ৳{item.pricePerUnit?.toLocaleString()}</p>
+                        <p style={{ fontSize: '0.8rem', color: '#a08070' }}>Qty: {item.quantity} × ₹{item.pricePerUnit?.toLocaleString()}</p>
                       </div>
-                      <p style={{ fontWeight: '600', color: '#c9956a' }}>৳{item.totalPrice?.toLocaleString()}</p>
+                      <p style={{ fontWeight: '600', color: '#c9956a' }}>₹{item.totalPrice?.toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
@@ -86,7 +86,7 @@ export default function MyOrdersPage() {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ fontSize: '0.75rem', color: '#a08070' }}>Total</p>
-                    <p style={{ fontWeight: '700', fontSize: '1.1rem', color: '#c9956a' }}>৳{order.totalAmount?.toLocaleString()}</p>
+                    <p style={{ fontWeight: '700', fontSize: '1.1rem', color: '#c9956a' }}>₹{order.totalAmount?.toLocaleString()}</p>
                   </div>
                 </div>
               </div>

@@ -108,11 +108,11 @@ export default function ProductDetailPage() {
             {/* Price */}
             <div style={{ marginBottom: '1.25rem' }}>
               <span style={{ fontSize: '2rem', fontWeight: '700', color: '#c9956a' }}>
-                ৳{price?.toLocaleString()}
+                ₹{price?.toLocaleString()}
               </span>
               {user?.role === 'shop' && (
                 <span style={{ marginLeft: '0.75rem', fontSize: '0.85rem', color: '#a08070', textDecoration: 'line-through' }}>
-                  ৳{product.customerPrice?.toLocaleString()} retail
+                  ₹{product.customerPrice?.toLocaleString()} retail
                 </span>
               )}
               {user?.role === 'shop' && (
@@ -170,7 +170,7 @@ export default function ProductDetailPage() {
                     }}
                   >+</button>
                   <span style={{ color: '#a08070', fontSize: '0.85rem' }}>
-                    Total: ৳{(price * quantity)?.toLocaleString()}
+                    Total: ₹{(price * quantity)?.toLocaleString()}
                   </span>
                 </div>
               </div>

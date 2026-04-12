@@ -137,12 +137,12 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Customer Price (৳) *</label>
+                  <label className="form-label">Customer Price (₹) *</label>
                   <input className="form-input" type="number" min="0" value={form.customerPrice} onChange={e => setForm({ ...form, customerPrice: e.target.value })} required placeholder="e.g. 1500" />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Shop/Bulk Price (৳) *</label>
+                  <label className="form-label">Shop/Bulk Price (₹) *</label>
                   <input className="form-input" type="number" min="0" value={form.shopPrice} onChange={e => setForm({ ...form, shopPrice: e.target.value })} required placeholder="e.g. 1200" />
                 </div>
 
@@ -215,7 +215,7 @@ export default function AdminProducts() {
               <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(44,26,14,0.08)' }}>
                 <thead>
                   <tr style={{ background: 'linear-gradient(135deg, #2c1a0e, #4a2512)' }}>
-                    {['Image', 'Name', 'Customer ৳', 'Shop ৳', 'Stock', 'Status', 'Actions'].map(h => (
+                    {['Image', 'Name', 'Customer ₹', 'Shop ₹', 'Stock', 'Status', 'Actions'].map(h => (
                       <th key={h} style={{ padding: '0.875rem 1rem', color: '#f0d9c8', fontWeight: '600', fontSize: '0.8rem', textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -232,8 +232,8 @@ export default function AdminProducts() {
                         <p style={{ fontWeight: '600', color: '#2c1a0e', fontSize: '0.9rem' }}>{p.name}</p>
                         <p style={{ fontSize: '0.75rem', color: '#a08070' }}>{p.category}</p>
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: '600', color: '#c9956a' }}>৳{p.customerPrice?.toLocaleString()}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#5a8a5a', fontWeight: '600' }}>৳{p.shopPrice?.toLocaleString()}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: '600', color: '#c9956a' }}>₹{p.customerPrice?.toLocaleString()}</td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#5a8a5a', fontWeight: '600' }}>₹{p.shopPrice?.toLocaleString()}</td>
                       <td style={{ padding: '0.75rem 1rem' }}>
                         <span className={p.stock === 0 ? 'stock-out' : p.stock < 5 ? 'stock-low' : 'stock-ok'}>
                           {p.stock === 0 ? '✗ Out' : p.stock < 5 ? `⚠️ ${p.stock}` : `✓ ${p.stock}`}
