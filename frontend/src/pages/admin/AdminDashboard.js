@@ -10,7 +10,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/api/admin/dashboard')
+    axios.get('https://bridal-orna.onrender.com/api/admin/dashboard')
       .then(res => { setStats(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
@@ -25,7 +25,7 @@ export default function AdminDashboard() {
     { label: 'Total Products', value: stats?.totalProducts, icon: '🌸', color: '#7b2d8b', bg: '#f9f0ff' },
     { label: 'Total Customers', value: stats?.customerUsers, icon: '👤', color: '#c9956a', bg: '#fdf3ea' },
     { label: 'Shop Accounts', value: stats?.shopUsers, icon: '🏪', color: '#5a8a5a', bg: '#eafaf1' },
-    { label: 'Revenue (Delivered)', value: `₹${stats?.totalRevenue?.toLocaleString() || 0}`, icon: '💰', color: '#c9956a', bg: '#fdf3ea' },
+    { label: 'Revenue (Delivered)', value: `৳${stats?.totalRevenue?.toLocaleString() || 0}`, icon: '💰', color: '#c9956a', bg: '#fdf3ea' },
   ];
 
   return (

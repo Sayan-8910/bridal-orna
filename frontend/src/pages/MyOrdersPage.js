@@ -15,7 +15,7 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/api/orders/my')
+    axios.get('https://bridal-orna.onrender.com/api/orders/my')
       .then(res => { setOrders(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);

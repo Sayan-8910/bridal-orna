@@ -6,7 +6,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { getImageUrl } from '../../utils/imageUrl';
+
+const API_BASE = 'https://bridal-orna.onrender.com';
 const STATUSES = ['Pending', 'In Progress', 'Delivered', 'Cancelled'];
 
 export default function AdminOrders() {
@@ -23,9 +24,10 @@ export default function AdminOrders() {
       const params = new URLSearchParams();
       if (roleFilter !== 'all') params.append('role', roleFilter);
       if (statusFilter !== 'all') params.append('status', statusFilter);
-      const res = await axios.get(`/api/admin/orders?${params}`);
-      setOrders(res.data);
-    } catch (e) { console.error(e); }
+      const res = await axios.get(`${API_BASE}/api/admin/orders?${params}`);
+      // Ensure data is always an array
+      setOrders(Array.isArray(res.data) ? res.data : []);
+    } catch (e) { console.error(e); setOrders([]); }
     finally { setLoading(false); }
   }, [roleFilter, statusFilter]);
 
@@ -34,7 +36,7 @@ export default function AdminOrders() {
   const updateStatus = async (orderId, newStatus) => {
     setUpdatingId(orderId);
     try {
-      await axios.put(`/api/admin/orders/${orderId}/status`, { status: newStatus });
+      await axios.put(`${API_BASE}/api/admin/orders/${orderId}/status`, { status: newStatus });
       setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
     } catch (e) { alert('Failed to update status.'); }
     finally { setUpdatingId(null); }
@@ -155,10 +157,10 @@ export default function AdminOrders() {
                       {/* Items */}
                       <div>
                         <h4 style={{ fontSize: '0.875rem', color: '#2c1a0e', marginBottom: '0.75rem', fontFamily: 'Playfair Display, serif' }}>📦 Order Items</h4>
-                        {(order.items || []).map((item, i) => (
+                        {order.items.map((item, i) => (
                           <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
                             {item.product?.images?.length > 0 ? (
-                              <img src={getImageUrl(item.product.images[0])} alt={item.productName} style={{ width: '44px', height: '44px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #e8d5c4' }} />
+                              <img src={item.product.images[0]} alt={item.productName} style={{ width: '44px', height: '44px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #e8d5c4' }} />
                             ) : <div style={{ width: '44px', height: '44px', borderRadius: '6px', background: '#f5ede3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🌸</div>}
                             <div style={{ flex: 1, fontSize: '0.85rem' }}>
                               <p style={{ fontWeight: '600', color: '#2c1a0e' }}>{item.productName}</p>
@@ -177,7 +179,7 @@ export default function AdminOrders() {
                             {order.customDesign.description && <p style={{ fontSize: '0.85rem', color: '#6a4a3a', marginBottom: '0.5rem' }}>{order.customDesign.description}</p>}
                             {order.customDesign.imagePath && (
                               <a href={order.customDesign.imagePath} target="_blank" rel="noreferrer">
-                                <img src={getImageUrl(order.customDesign.imagePath)} alt="Design reference"
+                                <img src={order.customDesign.imagePath} alt="Design reference"
                                   style={{ maxWidth: '120px', borderRadius: '8px', border: '1px solid #e8d5c4' }} />
                               </a>
                             )}

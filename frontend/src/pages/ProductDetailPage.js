@@ -8,7 +8,6 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import WhatsAppButton from '../components/WhatsAppButton';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { getImageUrl } from '../utils/imageUrl';
 
 const API_BASE = 'https://bridal-orna.onrender.com';
 
@@ -23,7 +22,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    axios.get(`/api/products/${id}`)
+    axios.get(`https://bridal-orna.onrender.com/api/products/${id}`)
       .then(res => { setProduct(res.data); setLoading(false); })
       .catch(() => { setLoading(false); });
   }, [id]);
@@ -67,7 +66,7 @@ export default function ProductDetailPage() {
             }}>
               {product.images && product.images.length > 0 ? (
                 <img
-                  src={getImageUrl(product.images[selectedImage])}
+                  src={product.images[selectedImage]}
                   alt={product.name}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
@@ -92,7 +91,7 @@ export default function ProductDetailPage() {
                     border: selectedImage === i ? '2px solid #c9956a' : '2px solid #e8d5c4',
                     cursor: 'pointer', padding: 0, background: 'none',
                   }}>
-                    <img src={getImageUrl(img)} alt={`view ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={img} alt={`view ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </button>
                 ))}
               </div>

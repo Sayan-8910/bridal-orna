@@ -29,7 +29,7 @@ export default function BookingPage() {
   const [designImage, setDesignImage] = useState(null);
 
   useEffect(() => {
-    axios.get(`/api/products/${id}`)
+    axios.get(`https://bridal-orna.onrender.com/api/products/${id}`)
       .then(res => { setProduct(res.data); setLoading(false); })
       .catch(() => { setLoading(false); });
   }, [id]);
@@ -52,7 +52,7 @@ export default function BookingPage() {
       if (customDesign) formData.append('customDesignDescription', designDesc);
       if (customDesign && designImage) formData.append('designImage', designImage);
 
-      await axios.post('/api/orders', formData, {
+      await axios.post('https://bridal-orna.onrender.com/api/orders', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

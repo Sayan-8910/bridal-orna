@@ -11,25 +11,20 @@ import LoadingSpinner from '../components/LoadingSpinner';
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
-    setError('');
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (category) params.append('category', category);
-      const queryString = params.toString();
-      const res = await axios.get(`/api/products${queryString ? `?${queryString}` : ''}`);
-      setProducts(Array.isArray(res.data) ? res.data : res.data.products || []);
+      const res = await axios.get(`https://bridal-orna.onrender.com/api/products?${params}`);
+      setProducts(res.data);
     } catch (err) {
       console.error(err);
-      setError('Unable to load products right now. Please try again.');
-      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -104,12 +99,6 @@ export default function ProductsPage() {
             {products.length === 0 ? 'No products found.' : `Showing ${products.length} product${products.length !== 1 ? 's' : ''}`}
             {search && ` for "${search}"`}
           </p>
-        )}
-
-        {error && (
-          <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-            {error}
-          </div>
         )}
 
         {/* Products Grid */}
