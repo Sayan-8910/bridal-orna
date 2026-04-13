@@ -135,14 +135,16 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       </div>
     `;
 
+    const orderNotificationRecipient = process.env.ORDER_NOTIFICATION_EMAIL || 'arun983663@gmail.com';
+
     await transporter.sendMail({
       from: `"Bridal Orna Orders" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER, // Send to yourself (admin)
+      to: orderNotificationRecipient,
       subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`,
       html,
     });
 
-    console.log('✅ Admin order notification email sent!');
+    console.log(`✅ Order notification email sent to ${orderNotificationRecipient}`);
   } catch (err) {
     console.log('❌ Admin email notification failed:', err.message);
   }
