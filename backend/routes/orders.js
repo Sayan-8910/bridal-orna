@@ -15,42 +15,11 @@ const dns = require('dns').promises;
 // ---- Helper: Send email notification to admin ----
 const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) => {
   try {
+    const resendApiKey = (process.env.RESEND_API_KEY || '').trim();
+    const resendFromEmail = (process.env.RESEND_FROM_EMAIL || '').trim();
     const emailUser = (process.env.EMAIL_USER || '').trim();
     const emailPass = (process.env.EMAIL_PASS || '').trim();
     const orderNotificationRecipient = (process.env.ORDER_NOTIFICATION_EMAIL || 'arun983663@gmail.com').trim();
-
-    if (!emailUser || !emailPass) {
-      console.log('Email notification skipped - EMAIL_USER/PASS not set');
-      return;
-    }
-
-    // Force IPv4 route on Render to avoid IPv6 ENETUNREACH with Gmail SMTP.
-    let smtpHost = 'smtp.gmail.com';
-    try {
-      const ipv4Records = await dns.resolve4('smtp.gmail.com');
-      if (Array.isArray(ipv4Records) && ipv4Records.length > 0) {
-        smtpHost = ipv4Records[0];
-      }
-    } catch (dnsErr) {
-      console.log('⚠️ IPv4 DNS resolve failed, falling back to hostname:', dnsErr?.message || dnsErr);
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      connectionTimeout: 30000,
-      greetingTimeout: 30000,
-      socketTimeout: 60000,
-      tls: {
-        servername: 'smtp.gmail.com',
-      },
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    });
 
     const customerType = user.role === 'shop' ? '🏪 Shop / Retailer' : '👤 Individual Customer';
     const shopInfo = user.shopName ? `<p><strong>Shop Name:</strong> ${user.shopName}</p>` : '';
@@ -160,18 +129,89 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       </div>
     `;
 
+    const subject = `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`;
+
+    // Primary provider: Resend API (recommended for Render/production reliability)
+    if (resendApiKey && resendFromEmail) {
+      let resendLastError = null;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: resendFromEmail,
+              to: [orderNotificationRecipient],
+              subject,
+              html,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Resend ${response.status}: ${errorBody}`);
+          }
+
+          const data = await response.json();
+          console.log(`✅ Order notification email sent via Resend to ${orderNotificationRecipient} (${data.id || 'no-id'})`);
+          return { ok: true, recipient: orderNotificationRecipient, provider: 'resend' };
+        } catch (resendErr) {
+          resendLastError = resendErr;
+          console.log(`❌ Resend attempt ${attempt} failed:`, resendErr?.message || resendErr);
+        }
+      }
+
+      return { ok: false, error: resendLastError?.message || 'Unknown Resend error', provider: 'resend' };
+    }
+
+    if (!emailUser || !emailPass) {
+      console.log('Email notification skipped - no provider configured (set RESEND_* or EMAIL_USER/PASS)');
+      return { ok: false, error: 'No email provider configured' };
+    }
+
+    // Fallback provider: Gmail SMTP
+    let smtpHost = 'smtp.gmail.com';
+    try {
+      const ipv4Records = await dns.resolve4('smtp.gmail.com');
+      if (Array.isArray(ipv4Records) && ipv4Records.length > 0) {
+        smtpHost = ipv4Records[0];
+      }
+    } catch (dnsErr) {
+      console.log('⚠️ IPv4 DNS resolve failed, falling back to hostname:', dnsErr?.message || dnsErr);
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
+      tls: {
+        servername: 'smtp.gmail.com',
+      },
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+    });
+
     let lastError = null;
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const info = await transporter.sendMail({
           from: `"Bridal Orna Orders" <${emailUser}>`,
           to: orderNotificationRecipient,
-          subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`,
+          subject,
           html,
         });
 
         console.log(`✅ Order notification email sent to ${orderNotificationRecipient} (${info.messageId})`);
-        return { ok: true, recipient: orderNotificationRecipient };
+        return { ok: true, recipient: orderNotificationRecipient, provider: 'smtp' };
       } catch (attemptErr) {
         lastError = attemptErr;
         console.log(`❌ Email attempt ${attempt} failed:`, attemptErr?.message || attemptErr);
