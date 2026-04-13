@@ -24,6 +24,7 @@ import AdminOrders from './pages/admin/AdminOrders';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
+import ScrollToTop from './components/ScrollToTop';
 
 // Protected route component - redirects to login if not authenticated
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -40,6 +41,7 @@ function AppContent() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Navbar />
         <main style={{ flex: 1 }}>
