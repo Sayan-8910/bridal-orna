@@ -27,6 +27,7 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       host: 'smtp.gmail.com',
       port: 587,
       secure: false,
+      family: 4,
       requireTLS: true,
       connectionTimeout: 30000,
       greetingTimeout: 30000,

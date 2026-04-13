@@ -7,9 +7,17 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const dns = require('dns');
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Render can return IPv6 first; force IPv4 to avoid SMTP ENETUNREACH for Gmail.
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch (err) {
+  console.log('DNS result order setup skipped:', err?.message || err);
+}
 
 const app = express();
 
