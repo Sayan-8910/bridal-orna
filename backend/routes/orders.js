@@ -24,10 +24,13 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
     }
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
       auth: {
         user: emailUser,
         pass: emailPass,
@@ -231,19 +234,26 @@ router.post('/', protect, (req, res) => {
         notes,
       });
 
-      // Try to send email, but cap waiting time so checkout does not hang.
-      const emailNotification = await Promise.race([
-        sendAdminEmailNotification(order, req.user, orderItems, totalAmount),
-        new Promise((resolve) => {
-          setTimeout(() => resolve({ ok: false, error: 'Email send timeout (background continued)' }), 8000);
-        }),
-      ]);
+      // Queue email in background so checkout remains fast on slow SMTP providers.
+      sendAdminEmailNotification(order, req.user, orderItems, totalAmount)
+        .then((result) => {
+          if (!result?.ok) {
+            console.log('⚠️ Order email failed (background):', result?.error || 'Unknown error');
+          }
+        })
+        .catch((emailErr) => {
+          console.log('⚠️ Order email background task crashed:', emailErr?.message || emailErr);
+        });
 
-      if (!emailNotification?.ok) {
-        console.log('⚠️ Order email status:', emailNotification?.error || 'Unknown error');
-      }
-
-      res.status(201).json({ message: 'Order placed successfully!', order, emailNotification });
+      res.status(201).json({
+        message: 'Order placed successfully!',
+        order,
+        emailNotification: {
+          ok: null,
+          status: 'queued',
+          note: 'Email is being sent in background',
+        },
+      });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
