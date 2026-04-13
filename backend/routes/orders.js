@@ -25,6 +25,9 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
       auth: {
         user: emailUser,
         pass: emailPass,
@@ -228,10 +231,18 @@ router.post('/', protect, (req, res) => {
         notes,
       });
 
-      // Send email notification and include status in API response for diagnostics
-      const emailNotification = await sendAdminEmailNotification(order, req.user, orderItems, totalAmount);
+      // Return success immediately; send email in background so checkout never hangs.
+      sendAdminEmailNotification(order, req.user, orderItems, totalAmount)
+        .then((result) => {
+          if (!result?.ok) {
+            console.log('⚠️ Order email failed (background):', result?.error || 'Unknown error');
+          }
+        })
+        .catch((emailErr) => {
+          console.log('⚠️ Order email background task crashed:', emailErr?.message || emailErr);
+        });
 
-      res.status(201).json({ message: 'Order placed successfully!', order, emailNotification });
+      res.status(201).json({ message: 'Order placed successfully!', order });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
