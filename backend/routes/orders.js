@@ -10,6 +10,7 @@ const Product = require('../models/Product');
 const { protect } = require('../middleware/auth');
 const { uploadDesignImage } = require('../middleware/upload');
 const nodemailer = require('nodemailer');
+const dns = require('dns').promises;
 
 // ---- Helper: Send email notification to admin ----
 const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) => {
@@ -23,15 +24,28 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       return;
     }
 
+    // Force IPv4 route on Render to avoid IPv6 ENETUNREACH with Gmail SMTP.
+    let smtpHost = 'smtp.gmail.com';
+    try {
+      const ipv4Records = await dns.resolve4('smtp.gmail.com');
+      if (Array.isArray(ipv4Records) && ipv4Records.length > 0) {
+        smtpHost = ipv4Records[0];
+      }
+    } catch (dnsErr) {
+      console.log('⚠️ IPv4 DNS resolve failed, falling back to hostname:', dnsErr?.message || dnsErr);
+    }
+
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
+      host: smtpHost,
       port: 587,
       secure: false,
-      family: 4,
       requireTLS: true,
       connectionTimeout: 30000,
       greetingTimeout: 30000,
       socketTimeout: 60000,
+      tls: {
+        servername: 'smtp.gmail.com',
+      },
       auth: {
         user: emailUser,
         pass: emailPass,
