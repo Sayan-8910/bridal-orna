@@ -14,7 +14,11 @@ const nodemailer = require('nodemailer');
 // ---- Helper: Send email notification to admin ----
 const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) => {
   try {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    const emailUser = (process.env.EMAIL_USER || '').trim();
+    const emailPass = (process.env.EMAIL_PASS || '').trim();
+    const orderNotificationRecipient = (process.env.ORDER_NOTIFICATION_EMAIL || 'arun983663@gmail.com').trim();
+
+    if (!emailUser || !emailPass) {
       console.log('Email notification skipped - EMAIL_USER/PASS not set');
       return;
     }
@@ -22,8 +26,8 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: emailUser,
+        pass: emailPass,
       },
     });
 
@@ -135,18 +139,16 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       </div>
     `;
 
-    const orderNotificationRecipient = process.env.ORDER_NOTIFICATION_EMAIL || 'arun983663@gmail.com';
-
-    await transporter.sendMail({
-      from: `"Bridal Orna Orders" <${process.env.EMAIL_USER}>`,
+    const info = await transporter.sendMail({
+      from: `"Bridal Orna Orders" <${emailUser}>`,
       to: orderNotificationRecipient,
       subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`,
       html,
     });
 
-    console.log(`✅ Order notification email sent to ${orderNotificationRecipient}`);
+    console.log(`✅ Order notification email sent to ${orderNotificationRecipient} (${info.messageId})`);
   } catch (err) {
-    console.log('❌ Admin email notification failed:', err.message);
+    console.log('❌ Admin email notification failed:', err?.message || err);
   }
 };
 
