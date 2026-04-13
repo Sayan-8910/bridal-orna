@@ -139,16 +139,28 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       </div>
     `;
 
-    const info = await transporter.sendMail({
-      from: `"Bridal Orna Orders" <${emailUser}>`,
-      to: orderNotificationRecipient,
-      subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`,
-      html,
-    });
+    let lastError = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const info = await transporter.sendMail({
+          from: `"Bridal Orna Orders" <${emailUser}>`,
+          to: orderNotificationRecipient,
+          subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`,
+          html,
+        });
 
-    console.log(`✅ Order notification email sent to ${orderNotificationRecipient} (${info.messageId})`);
+        console.log(`✅ Order notification email sent to ${orderNotificationRecipient} (${info.messageId})`);
+        return { ok: true, recipient: orderNotificationRecipient };
+      } catch (attemptErr) {
+        lastError = attemptErr;
+        console.log(`❌ Email attempt ${attempt} failed:`, attemptErr?.message || attemptErr);
+      }
+    }
+
+    return { ok: false, error: lastError?.message || 'Unknown email error' };
   } catch (err) {
     console.log('❌ Admin email notification failed:', err?.message || err);
+    return { ok: false, error: err?.message || 'Unknown email error' };
   }
 };
 
@@ -216,10 +228,10 @@ router.post('/', protect, (req, res) => {
         notes,
       });
 
-      // Send email notification to admin (non-blocking)
-      sendAdminEmailNotification(order, req.user, orderItems, totalAmount);
+      // Send email notification and include status in API response for diagnostics
+      const emailNotification = await sendAdminEmailNotification(order, req.user, orderItems, totalAmount);
 
-      res.status(201).json({ message: 'Order placed successfully!', order });
+      res.status(201).json({ message: 'Order placed successfully!', order, emailNotification });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
