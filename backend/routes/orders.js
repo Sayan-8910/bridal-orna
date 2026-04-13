@@ -231,18 +231,19 @@ router.post('/', protect, (req, res) => {
         notes,
       });
 
-      // Return success immediately; send email in background so checkout never hangs.
-      sendAdminEmailNotification(order, req.user, orderItems, totalAmount)
-        .then((result) => {
-          if (!result?.ok) {
-            console.log('⚠️ Order email failed (background):', result?.error || 'Unknown error');
-          }
-        })
-        .catch((emailErr) => {
-          console.log('⚠️ Order email background task crashed:', emailErr?.message || emailErr);
-        });
+      // Try to send email, but cap waiting time so checkout does not hang.
+      const emailNotification = await Promise.race([
+        sendAdminEmailNotification(order, req.user, orderItems, totalAmount),
+        new Promise((resolve) => {
+          setTimeout(() => resolve({ ok: false, error: 'Email send timeout (background continued)' }), 8000);
+        }),
+      ]);
 
-      res.status(201).json({ message: 'Order placed successfully!', order });
+      if (!emailNotification?.ok) {
+        console.log('⚠️ Order email status:', emailNotification?.error || 'Unknown error');
+      }
+
+      res.status(201).json({ message: 'Order placed successfully!', order, emailNotification });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
