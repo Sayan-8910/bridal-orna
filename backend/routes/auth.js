@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const dns = require('dns').promises;
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 
@@ -20,19 +21,94 @@ const generateToken = (id) => {
   });
 };
 
-// Helper: Send email via Gmail
+// Helper: Send email via Resend (preferred) or Gmail SMTP fallback
 const sendEmail = async (to, subject, html) => {
+  const resendApiKey = (process.env.RESEND_API_KEY || '').trim();
+  const resendFromEmail = (process.env.RESEND_FROM_EMAIL || '').trim();
+  const emailUser = (process.env.EMAIL_USER || '').trim();
+  const emailPass = (process.env.EMAIL_PASS || '').trim();
+
+  let resendError = null;
+  if (resendApiKey && resendFromEmail) {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: `Bridal Orna <${resendFromEmail}>`,
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Resend API ${response.status}: ${errText}`);
+      }
+
+      return;
+    } catch (error) {
+      resendError = error;
+      console.log('Resend send failed, falling back to SMTP:', error?.message || error);
+    }
+  }
+
+  if (!emailUser || !emailPass) {
+    throw new Error(
+      resendError
+        ? `Email failed. Resend error: ${resendError.message}. SMTP credentials missing (EMAIL_USER/EMAIL_PASS).`
+        : 'SMTP credentials missing. Set EMAIL_USER and EMAIL_PASS in backend/.env'
+    );
+  }
+
+  let smtpHost = 'smtp.gmail.com';
+  try {
+    const ipv4Records = await dns.resolve4('smtp.gmail.com');
+    if (Array.isArray(ipv4Records) && ipv4Records.length > 0) {
+      smtpHost = ipv4Records[0];
+    }
+  } catch (dnsErr) {
+    console.log('SMTP DNS IPv4 lookup failed, using hostname:', dnsErr?.message || dnsErr);
+  }
+
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: smtpHost,
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 60000,
+    tls: {
+      servername: 'smtp.gmail.com',
+    },
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: emailUser,
+      pass: emailPass,
     },
   });
-  await transporter.sendMail({
-    from: `"Bridal Orna" <${process.env.EMAIL_USER}>`,
-    to, subject, html,
-  });
+
+  let smtpLastError = null;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await transporter.sendMail({
+        from: `"Bridal Orna" <${emailUser}>`,
+        to,
+        subject,
+        html,
+      });
+      return;
+    } catch (smtpErr) {
+      smtpLastError = smtpErr;
+      console.log(`SMTP send attempt ${attempt} failed:`, smtpErr?.message || smtpErr);
+    }
+  }
+
+  throw smtpLastError || new Error('Failed to send email via SMTP');
 };
 
 // ---- POST /api/auth/register ----
@@ -180,8 +256,10 @@ router.put('/me', protect, async (req, res) => {
 // Step 1: User enters email → receive OTP
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email is required' });
+    const inputEmail = (req.body.email || '').trim();
+    if (!inputEmail) return res.status(400).json({ message: 'Email is required' });
+
+    const email = inputEmail.toLowerCase();
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'No account found with this email address' });
@@ -211,7 +289,7 @@ router.post('/forgot-password', async (req, res) => {
 
     res.json({ message: 'OTP sent to your email! Check your inbox.' });
   } catch (error) {
-    console.error('Forgot password error:', error.message);
+    console.error('Forgot password error:', error?.stack || error?.message || error);
     res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
   }
 });
@@ -220,7 +298,8 @@ router.post('/forgot-password', async (req, res) => {
 // Step 2: Verify the OTP
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const email = (req.body.email || '').trim().toLowerCase();
+    const { otp } = req.body;
     if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
 
     const record = otpStore[email];
@@ -241,7 +320,8 @@ router.post('/verify-otp', async (req, res) => {
 // Step 3: Set new password
 router.post('/reset-password', async (req, res) => {
   try {
-    const { email, otp, newPassword } = req.body;
+    const email = (req.body.email || '').trim().toLowerCase();
+    const { otp, newPassword } = req.body;
     if (!email || !otp || !newPassword) return res.status(400).json({ message: 'All fields are required' });
     if (newPassword.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
 

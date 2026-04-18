@@ -113,11 +113,16 @@ JWT_SECRET=some_long_random_secret_string_change_this
 ADMIN_EMAIL=admin@yourbusiness.com
 ADMIN_PASSWORD=yourStrongPassword123
 WHATSAPP_NUMBER=919876543210
+EMAIL_USER=your-gmail@gmail.com
+EMAIL_PASS=your-gmail-app-password
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=noreply@yourdomain.com
 ```
 
 > **Important:** Change `JWT_SECRET` to any long random string.
 > Change `ADMIN_EMAIL` and `ADMIN_PASSWORD` to your real credentials.
 > `WHATSAPP_NUMBER` must include country code. Bangladesh: `880XXXXXXXXXX`, India: `91XXXXXXXXXX`
+> For Gmail SMTP, `EMAIL_PASS` must be a Google **App Password** (not your normal Gmail password).
 
 ---
 
