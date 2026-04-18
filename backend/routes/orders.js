@@ -43,8 +43,8 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       <tr>
         <td style="padding:0.6rem 1rem;border-bottom:1px solid #f0e4d8;">${item.productName}</td>
         <td style="padding:0.6rem 1rem;border-bottom:1px solid #f0e4d8;text-align:center;">${item.quantity}</td>
-        <td style="padding:0.6rem 1rem;border-bottom:1px solid #f0e4d8;text-align:right;">৳${item.pricePerUnit.toLocaleString()}</td>
-        <td style="padding:0.6rem 1rem;border-bottom:1px solid #f0e4d8;text-align:right;font-weight:bold;color:#c9956a;">৳${item.totalPrice.toLocaleString()}</td>
+        <td style="padding:0.6rem 1rem;border-bottom:1px solid #f0e4d8;text-align:right;">₹${item.pricePerUnit.toLocaleString()}</td>
+        <td style="padding:0.6rem 1rem;border-bottom:1px solid #f0e4d8;text-align:right;font-weight:bold;color:#c9956a;">₹${item.totalPrice.toLocaleString()}</td>
       </tr>
     `).join('');
 
@@ -108,7 +108,7 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
               </div>
               <div style="text-align:right;">
                 <p style="margin:0;color:#6a4a3a;font-size:0.85rem;">Grand Total</p>
-                <p style="margin:0.2rem 0 0;color:#c9956a;font-size:1.5rem;font-weight:bold;">৳${totalAmount.toLocaleString()}</p>
+                <p style="margin:0.2rem 0 0;color:#c9956a;font-size:1.5rem;font-weight:bold;">₹${totalAmount.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
     await transporter.sendMail({
       from: `"Bridal Orna Orders" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_NOTIFY_EMAIL || process.env.EMAIL_USER,
-      subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ৳${totalAmount.toLocaleString()} — ${user.name}`,
+      subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`,
       html,
     });
 
