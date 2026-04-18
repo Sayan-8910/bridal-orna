@@ -10,16 +10,22 @@ const Product = require('../models/Product');
 const { protect } = require('../middleware/auth');
 const { uploadDesignImage } = require('../middleware/upload');
 const nodemailer = require('nodemailer');
-const dns = require('dns').promises;
 
 // ---- Helper: Send email notification to admin ----
 const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) => {
   try {
-    const resendApiKey = (process.env.RESEND_API_KEY || '').trim();
-    const resendFromEmail = (process.env.RESEND_FROM_EMAIL || '').trim();
-    const emailUser = (process.env.EMAIL_USER || '').trim();
-    const emailPass = (process.env.EMAIL_PASS || '').trim();
-    const orderNotificationRecipient = (process.env.ORDER_NOTIFICATION_EMAIL || 'arun983663@gmail.com').trim();
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log('Email notification skipped - EMAIL_USER/PASS not set');
+      return;
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
     const customerType = user.role === 'shop' ? '🏪 Shop / Retailer' : '👤 Individual Customer';
     const shopInfo = user.shopName ? `<p><strong>Shop Name:</strong> ${user.shopName}</p>` : '';
@@ -129,99 +135,16 @@ const sendAdminEmailNotification = async (order, user, orderItems, totalAmount) 
       </div>
     `;
 
-    const subject = `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ₹${totalAmount.toLocaleString()} — ${user.name}`;
-
-    // Primary provider: Resend API (recommended for Render/production reliability)
-    if (resendApiKey && resendFromEmail) {
-      let resendLastError = null;
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-          const response = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: resendFromEmail,
-              to: [orderNotificationRecipient],
-              subject,
-              html,
-            }),
-          });
-
-          if (!response.ok) {
-            const errorBody = await response.text();
-            throw new Error(`Resend ${response.status}: ${errorBody}`);
-          }
-
-          const data = await response.json();
-          console.log(`✅ Order notification email sent via Resend to ${orderNotificationRecipient} (${data.id || 'no-id'})`);
-          return { ok: true, recipient: orderNotificationRecipient, provider: 'resend' };
-        } catch (resendErr) {
-          resendLastError = resendErr;
-          console.log(`❌ Resend attempt ${attempt} failed:`, resendErr?.message || resendErr);
-        }
-      }
-
-      return { ok: false, error: resendLastError?.message || 'Unknown Resend error', provider: 'resend' };
-    }
-
-    if (!emailUser || !emailPass) {
-      console.log('Email notification skipped - no provider configured (set RESEND_* or EMAIL_USER/PASS)');
-      return { ok: false, error: 'No email provider configured' };
-    }
-
-    // Fallback provider: Gmail SMTP
-    let smtpHost = 'smtp.gmail.com';
-    try {
-      const ipv4Records = await dns.resolve4('smtp.gmail.com');
-      if (Array.isArray(ipv4Records) && ipv4Records.length > 0) {
-        smtpHost = ipv4Records[0];
-      }
-    } catch (dnsErr) {
-      console.log('⚠️ IPv4 DNS resolve failed, falling back to hostname:', dnsErr?.message || dnsErr);
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      connectionTimeout: 30000,
-      greetingTimeout: 30000,
-      socketTimeout: 60000,
-      tls: {
-        servername: 'smtp.gmail.com',
-      },
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
+    await transporter.sendMail({
+      from: `"Bridal Orna Orders" <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_NOTIFY_EMAIL || process.env.EMAIL_USER,
+      subject: `🌸 New Order #${order._id.toString().slice(-8).toUpperCase()} — ৳${totalAmount.toLocaleString()} — ${user.name}`,
+      html,
     });
 
-    let lastError = null;
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const info = await transporter.sendMail({
-          from: `"Bridal Orna Orders" <${emailUser}>`,
-          to: orderNotificationRecipient,
-          subject,
-          html,
-        });
-
-        console.log(`✅ Order notification email sent to ${orderNotificationRecipient} (${info.messageId})`);
-        return { ok: true, recipient: orderNotificationRecipient, provider: 'smtp' };
-      } catch (attemptErr) {
-        lastError = attemptErr;
-        console.log(`❌ Email attempt ${attempt} failed:`, attemptErr?.message || attemptErr);
-      }
-    }
-
-    return { ok: false, error: lastError?.message || 'Unknown email error' };
+    console.log('✅ Admin order notification email sent!');
   } catch (err) {
-    console.log('❌ Admin email notification failed:', err?.message || err);
-    return { ok: false, error: err?.message || 'Unknown email error' };
+    console.log('❌ Admin email notification failed:', err.message);
   }
 };
 
@@ -289,26 +212,10 @@ router.post('/', protect, (req, res) => {
         notes,
       });
 
-      // Queue email in background so checkout remains fast on slow SMTP providers.
-      sendAdminEmailNotification(order, req.user, orderItems, totalAmount)
-        .then((result) => {
-          if (!result?.ok) {
-            console.log('⚠️ Order email failed (background):', result?.error || 'Unknown error');
-          }
-        })
-        .catch((emailErr) => {
-          console.log('⚠️ Order email background task crashed:', emailErr?.message || emailErr);
-        });
+      // Send email notification to admin (non-blocking)
+      sendAdminEmailNotification(order, req.user, orderItems, totalAmount);
 
-      res.status(201).json({
-        message: 'Order placed successfully!',
-        order,
-        emailNotification: {
-          ok: null,
-          status: 'queued',
-          note: 'Email is being sent in background',
-        },
-      });
+      res.status(201).json({ message: 'Order placed successfully!', order });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
